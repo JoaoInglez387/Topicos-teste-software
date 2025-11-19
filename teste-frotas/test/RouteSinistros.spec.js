@@ -1,4 +1,3 @@
-
 //Importações das bibliotecas
 const {it, expect, describe} = require ('@jest/globals');
 const request =  require ("supertest");
@@ -18,7 +17,9 @@ describe("Teste de Integração - Sinistro Frotas", () => {
     const req = request(BASE_URL);
     let token;
     let sinistroId;
-    let sinistroNome;
+    let tipoSinistro;
+    let motorista;
+    let veiculo;
 
 //Caso de teste
     it("Deve Autenticar na API - Usando o ADMIN", async () => {
@@ -33,9 +34,8 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         expect(dados.status).toBe(200);
         expect(dados.body.data.token).toBeDefined();
         token = dados.body?.data?.token;
-        console.log(token);
+        //console.log(token);
 
-        //console.log("Status Login",dados.status, '\nLogin Body:',dados.body);
     });
 
     it("Deve retornar uma lista de sinistros (Acidentes inprevisiveis)", async () => {
@@ -45,9 +45,10 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         .set("Authorization",`Bearer ${token}`)
         .expect(200);
         expect(resposta.status).toBe(200);
-        sinistroId = resposta.body.data[0]._id
-        sinistroNome = resposta.body.data[0].nome;
-        //console.log(resposta.body.data[0]._id);
+        sinistroId = resposta.body.data[0]._id;
+        tipoSinistro = resposta.body.data[0].tipo_sinistro;
+        motorista = resposta.body.data[0].motorista._id;
+        veiculo = resposta.body.data[0].veiculo._id;
 
     });
 
@@ -58,17 +59,30 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         .set("Authorization",`Bearer ${token}`)
         .expect(200);
         expect(resposta.status).toBe(200);
-        console.log(resposta.body);
+        //console.log(resposta.body);
     });
 
-    it("Deve retornar um sinistro com base no nome", async () => {
+    it("Deve criar um sinistro com sucesso", async () => {
+        const data = new Date();
+
+        const novoSinistro = {
+            tipo_sinistro: "Incêndios",
+            data_sinistro: data,
+            local_sinistro: "Lugar do Nunca",
+            descricao: "Sinistro para teste",
+            veiculo: veiculo,
+            motorista: motorista,
+            fotos: ["/arquivos/000000000000000000000000/cafe.jpg" ],
+            responsavel_analise: "Carlinhos da Silva"
+        }
+    
         const resposta = await req 
-        .get(`/sinistros/${sinistroNome}`)
-        .set('Accept','application/json')
-        .set("Authorization",`Bearer ${token}`)
-        .expect(200);
-        expect(resposta.status).toBe(200);
-        console.log(resposta.body);
+        .post(`/sinistros`)
+        .send(novoSinistro)
+        .set("Authorization",`Bearer ${token}`);
+
+        expect(resposta.status).toBe(201);
+        expect(resposta.body.data.tipoSinistro).toBe(novoSinistro.tipo_sinistro);
     });
 
 });
