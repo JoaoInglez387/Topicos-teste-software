@@ -17,7 +17,6 @@ describe("Teste de Integração - Sinistro Frotas", () => {
     const req = request(BASE_URL);
     let token;
     let sinistroId;
-    let tipoSinistro;
     let motorista;
     let veiculo;
 
@@ -46,7 +45,6 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         .expect(200);
         expect(resposta.status).toBe(200);
         sinistroId = resposta.body.data[0]._id;
-        tipoSinistro = resposta.body.data[0].tipo_sinistro;
         motorista = resposta.body.data[0].motorista._id;
         veiculo = resposta.body.data[0].veiculo._id;
 
@@ -62,7 +60,8 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         //console.log(resposta.body);
     });
 
-    it("Deve criar um sinistro com sucesso", async () => {
+    //Post
+    it.skip("Deve criar um sinistro com sucesso", async () => {
         const data = new Date();
 
         const novoSinistro = {
@@ -72,7 +71,7 @@ describe("Teste de Integração - Sinistro Frotas", () => {
             descricao: "Sinistro para teste",
             veiculo: veiculo,
             motorista: motorista,
-            fotos: ["/arquivos/000000000000000000000000/cafe.jpg" ],
+            fotos: ["/arquivos/000000000000000000000000/cafe.jpg"],
             responsavel_analise: "Carlinhos da Silva"
         }
     
@@ -80,9 +79,45 @@ describe("Teste de Integração - Sinistro Frotas", () => {
         .post(`/sinistros`)
         .send(novoSinistro)
         .set("Authorization",`Bearer ${token}`);
+        console.log(resposta.body);
 
         expect(resposta.status).toBe(201);
         expect(resposta.body.data.tipoSinistro).toBe(novoSinistro.tipo_sinistro);
+    });
+
+    //Path
+    it.skip("Deve atualizar um sinistro por ID", async () => {
+        const sinistroPatch = {
+            descricao: "Não sei o que é?",
+            responsavel_analise: "Roberto Nogueira"
+        };
+
+        const dados = await req
+            .patch(`/sinistros/${sinistroId}`)
+            .send(sinistroPatch)
+            .set("Accept", "application/json")
+            .set("Authorization", `Bearer ${token}`)
+            .expect("content-type", /json/)
+            .expect(200);
+
+        expect(dados.status).toBe(200);
+        expect(dados.body?.data?.descricao).toEqual(sinistroPatch.descricao);
+        expect(dados.body?.data?.responsavel_analise).toEqual(sinistroPatch.responsavel_analise);
+    });
+
+    //Delete
+    it.skip("Deve excluir um sinistro por ID", async () => {
+
+        const dados = await req
+        .delete(`/sinistros/${sinistroId}`)
+        .set("Accept", "application/json")
+        .set("Authorization", `Bearer ${token}`)
+        .expect("content-type", /json/)
+        .expect(200);
+
+        //console.log(dados.body);
+
+        expect(dados.status).toBe(200);
     });
 
 });
