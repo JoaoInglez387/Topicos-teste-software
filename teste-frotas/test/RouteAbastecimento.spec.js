@@ -61,13 +61,13 @@ describe("Teste de Integração - Abastecimentos", () => {
     test("Deve criar um abastecimento com sucesso", async () => {
         const novoAbastecimento = {
             veiculo: "68e961273823059a4013249e",
-            data_abastecimento: "2025-11-12T05:11:00.000Z",
-            tipo_combustivel: "GASOLINA_ADITIVADA",
-            posto_combustivel: "Martins-Moreira Combustíveis",
+            data_abastecimento: "2044-01-16T17:30:36.657Z",
+            tipo_combustivel: "DIESEL_COMUM_S500",
+            posto_combustivel: "Posto do Zé",
             litragem: 500,
-            valor_total: 220,
-            valor_litro: 5.5,
-            km_hora_atual: 465,
+            valor_total: 1000,
+            valor_litro: 2.1,
+            km_hora_atual: 541154,
             reserva: "68e961333823059a40134324"
         }
     
