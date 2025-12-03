@@ -12,7 +12,6 @@ describe("Teste de Integração - Abastecimentos", () => {
     const req = request(BASE_URL);
     let token;
     let abastecimentoID;
-    let veiculo;
     
 
 // Caso de teste
@@ -24,11 +23,14 @@ describe("Teste de Integração - Abastecimentos", () => {
             senha:API_PASS
         })
         .set('Accept','application/json');
-
+        //Afirmação de que o status da resposta deve ser 200
         expect(dados.status).toBe(200);
+        //Afirmo que na resposta esteja definado o token
         expect(dados.body.data.token).toBeDefined();
+        //Armazena o token da resposta na variavel token
         token = dados.body?.data?.token;
         //console.log(token);
+        //console.log("Status Login",dados.status, '\nLogin Body:',dados.body);
     });
 
 
@@ -40,9 +42,8 @@ describe("Teste de Integração - Abastecimentos", () => {
         .set("Authorization",`Bearer ${token}`)
         .expect(200);
         expect(resposta.status).toBe(200);
-
         abastecimentoID = resposta.body.data[0]._id
-        veiculo = resposta.body.data[0].veiculo._id;
+        //console.log(resposta.body.data[0]._id);
     });
 
     //Get ID
@@ -54,18 +55,16 @@ describe("Teste de Integração - Abastecimentos", () => {
         .expect(200);
         expect(resposta.status).toBe(200);
         //console.log(resposta.body);
-
     });
 
      //Post
     test("Deve criar um abastecimento com sucesso", async () => {
-
         const novoAbastecimento = {
             veiculo: "68e961273823059a4013249e",
             data_abastecimento: "2025-11-12T05:11:00.000Z",
             tipo_combustivel: "GASOLINA_ADITIVADA",
             posto_combustivel: "Martins-Moreira Combustíveis",
-            litragem: 40,
+            litragem: 500,
             valor_total: 220,
             valor_litro: 5.5,
             km_hora_atual: 465,
@@ -73,16 +72,48 @@ describe("Teste de Integração - Abastecimentos", () => {
         }
     
         const resposta = await req 
-        .post(`/abastecimentos`)
-        .send(novoAbastecimento)
-        .set("Authorization",`Bearer ${token}`);
-        console.log(resposta.body);
-
-        /* expect(201);
+            .post(`/abastecimentos`)
+            .send(novoAbastecimento)
+            .set("Authorization",`Bearer ${token}`);
+        //console.log(resposta.body);
+        expect(201);
         expect(resposta.status).toBe(201);
-        expect(resposta.body.data.veiculo).toBe(novoAbastecimento.veiculo); */
+        expect(resposta.body.data.veiculo).toBe(novoAbastecimento.veiculo);
+        abastecimentoID = resposta.body.data._id;
     });
     
+    //Path
+    it("Deve atualizar um abastecimento por ID", async () => {
+        const abastecimentoPath = {
+            posto_combustivel: "Posto do Zé",
+            litragem: 535,
+            km_hora_atual: 5724,
+        }
+
+        const dados = await req 
+            .put(`/abastecimentos/${abastecimentoID}`)
+            .set("Accept", "application/json")
+            .set("Authorization",`Bearer ${token}`)
+            .expect("content-type", /json/)
+            .expect(200);
+
+        expect(dados.status).toBe(200);
+        expect(dados.body?.data?.posto_combustivel).toEqual(abastecimentoPath.posto_combustivel);
+        expect(dados.body.data.litragem).toBe(abastecimentoPath.litragem);
+        expect(dados.body.data.km_hora_atual).toBe(abastecimentoPath.km_hora_atual);
+    });
+
+    //Delete
+    it("Deve excluir um abastecimento por ID", async () => {
+        const dados = await req
+            .delete(`/abastecimentos/${abastecimentoID}`)
+            .set("Accept", "application/json")
+            .set("Authorization", `Bearer ${token}`)
+            .expect("content-type", /json/)
+            .expect(200);
+
+        expect(dados.status).toBe(200);
+    })
 
 
 })
